@@ -1,0 +1,8 @@
+## Interface: 50500
+## Title: |cffffd700Greeder|r
+## Notes: Automatically rolls greed on armor items not useful to the current character's class
+## Author: Rick
+## Version: 1.0.0
+## SavedVariables: GreederDB
+
+Greeder.lua
