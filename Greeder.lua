@@ -5,7 +5,7 @@ local function OnPlayerLogin(self, event)
     if GreederDB == nil then GreederDB = {} end
     if GreederDB.enabled == nil then GreederDB.enabled = true end
     if GreederDB.debugMode == nil then GreederDB.debugMode = false end
-	local status = GreederDB.enabled and "|cff00ff00ON|r" or "|cffff0000OFF|r"
+    local status = GreederDB.enabled and "|cff00ff00ON|r" or "|cffff0000OFF|r"
     print(string.format("Greeder loaded and %s. Type /greeder for options.", status))
     self:UnregisterEvent("PLAYER_LOGIN")
 end
@@ -57,12 +57,12 @@ SlashCmdList["Greeder"] = SlashCmdHandler
 local eventFrame = CreateFrame("Frame")
 local playerClass = select(2, UnitClass("player"))
 
-local classGreedWhitelist = {
-	-- Cloth
+local classArmorGreedlist = {
+    -- Cloth
     ["MAGE"] = { "Leather", "Mail", "Plate" },
     ["WARLOCK"] = { "Leather", "Mail", "Plate" },
     ["PRIEST"] = { "Leather", "Mail", "Plate" },
-	
+
     -- Leather
     ["DRUID"] = { "Cloth", "Mail", "Plate" },
     ["ROGUE"] = { "Cloth", "Mail", "Plate" },
@@ -79,7 +79,7 @@ local classGreedWhitelist = {
 }
 
 -- Helper function to check if an item's subtype is in a given class's whitelist.
-local function isItemInWhitelist(itemSubType, whitelist)
+local function isItemInGreedlist(itemSubType, whitelist)
     if not whitelist then return false end
     for i, whitelistedType in ipairs(whitelist) do
         if itemSubType == whitelistedType then
@@ -92,26 +92,77 @@ end
 local function ProcessLootItem(itemLink, rollID)
     local _, _, _, _, _, itemType, itemSubType, _, equipLocID, _, _, _, _, bindType = GetItemInfo(itemLink)
     local isBoP = (bindType == 1)
-    local isGreedableItemType = false
-	itemSubType = tostring(itemSubType)
-	
-	-- Class-specific logic using the whitelist
-    local playerWhitelist = classGreedWhitelist[playerClass]
-    local isWhitelisted = isItemInWhitelist(itemSubType, playerWhitelist)
-	
-	-- Don't roll on back slot, as they're always cloth
-    local isNotBackSlot = (equipLocID ~= "INVTYPE_CLOAK")
-	
-    local shouldRoll = (isBoP and isWhitelisted and isNotBackSlot)
 
-	-- Print details when debug is enabled
+    -- General equipment roll check
+
+    print("Starting usable item check")
+    local id = select(1, GetItemInfoInstant(itemLink))
+    print(string.format("id: %s", id))
+    local isUsableItem = C_PlayerInfo.CanUseItem(tostring(id))
+    print(string.format("Finished usable item check: %s", tostring(isUsableItem)))
+    
+    print("Starting equippable item check")
+    local isEquippable = IsEquippableItem(id)
+    print(string.format("isEquippable check finished: %s", tostring(isEquippable)))
+    
+    print("Setting unusable gear flag")
+    local unusableGear = (isEquippable and not isUsableItem)
+    print(string.format("Finished setting unusable gear flag: %s", tostring(unusableGear)))
+
+
+    --print("Starting usable item check")
+    --local id = select(1, GetItemInfoInstant(itemLink))
+    --print(string.format("id: %s", id))
+    --local isUsableItem = C_PlayerInfo.CanUseItem(itemLink)
+    --print(string.format("Finished usable item check: %s", itemLink))
+    --print("Starting equippable item check")
+    --local isEquippable = IsEquippableItem(itemLink)
+    --print(string.format("isEquippable check finished: %s", isEquippable))
+    --print("setting unusable gear flag")
+    --local unusableGear = (isEquippable and not isUsableItem)
+    --print("finished setting unusable gear flag")
+
+    -- Equipment roll check end
+
+
+
+    -- Armor roll check start
+
+    print("starting armor type check")
+
+    print("getting subtype")
+
+    itemSubType = tostring(itemSubType)
+
+    print("finished getting subtype: %s", itemSubType)
+
+
+    local playerWhitelist = classArmorGreedlist[playerClass]
+    local isGreedlisted = isItemInGreedlist(itemSubType, playerWhitelist)
+
+    -- Don't roll on back slot, as they're always cloth which will create false positives
+    local isNotBackSlot = (equipLocID ~= "INVTYPE_CLOAK")
+
+    local unusableArmorType = (isGreedlisted and isNotBackSlot)
+
+    print("finishing armor type check")
+
+    -- Armor roll check end
+
+
+
+    local shouldRoll = isBoP and (unusableGear or unusableArmorType)
+
+    -- Print details when debug is enabled
     if GreederDB.debugMode then
         print("|cffffd700--- Greeder: Loot Roll Debug ---|r")
         print("Item:", itemLink)
         print("|cffffff00-----------------------------------|r")
-        print(string.format("Is BoP: %s (BindType: %s)", tostring(isBoP), tostring(bindType)))
-        print(string.format("Is Unusable Armor Type: %s (Type: %s, SubType: %s)", tostring(isGreedableItemType), tostring(itemType), itemSubType))
-        print(string.format("Is NOT Back Slot? -> %s (EquipLoc: %s)", tostring(isNotBackSlot), tostring(equipLocID)))
+        print(string.format("Is BoP: %s", tostring(isBoP)))
+        print(string.format("Is equipment: %s", tostring(isEquippable)))
+        print(string.format("Is usable by this character: %s", tostring(isUsableItem)))
+        print(string.format("Is non-class armor type: %s", tostring(isGreedlisted)))
+        print(string.format("Is non-back slot: %s (EquipLoc: %s)", tostring(isNotBackSlot), tostring(equipLocID)))
         print("|cffffff00-----------------------------------|r")
         if shouldRoll then
             print("Result: |cff00ff00PASS|r. Conditions met, will attempt to roll Greed.")
