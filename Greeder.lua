@@ -93,7 +93,7 @@ local function ProcessLootItem(itemLink, rollID)
     local _, _, _, _, _, itemType, itemSubType, _, equipLocID, _, _, _, _, bindType = GetItemInfo(itemLink)
     local isBoP = (bindType == 1)
 
-    -- General equipment roll check start
+    -- General equipment roll check
 
     print("Starting usable item check")
     local id = select(1, GetItemInfoInstant(itemLink))
@@ -109,11 +109,11 @@ local function ProcessLootItem(itemLink, rollID)
     local unusableGear = (isEquippable and not isUsableItem)
     print(string.format("Finished setting unusable gear flag: %s", tostring(unusableGear)))
 
-    -- General equipement check end
+    -- Equipment roll check end
 
 
 
-    -- Armor type roll check start
+    -- Armor roll check start
 
     print("starting armor type check")
 
@@ -134,7 +134,7 @@ local function ProcessLootItem(itemLink, rollID)
 
     print("finishing armor type check")
 
-    -- Armor type roll check end
+    -- Armor roll check end
 
 
 
@@ -181,4 +181,3 @@ end
 
 eventFrame:RegisterEvent("START_LOOT_ROLL")
 eventFrame:SetScript("OnEvent", OnLootRoll)
-
