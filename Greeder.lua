@@ -95,19 +95,12 @@ local function ProcessLootItem(itemLink, rollID)
 
     -- General equipment roll check
 
-    print("Starting usable item check")
     local id = select(1, GetItemInfoInstant(itemLink))
-    print(string.format("id: %s", id))
+	
     local isUsableItem = C_PlayerInfo.CanUseItem(tostring(id))
-    print(string.format("Finished usable item check: %s", tostring(isUsableItem)))
-    
-    print("Starting equippable item check")
     local isEquippable = IsEquippableItem(id)
-    print(string.format("isEquippable check finished: %s", tostring(isEquippable)))
     
-    print("Setting unusable gear flag")
     local unusableGear = (isEquippable and not isUsableItem)
-    print(string.format("Finished setting unusable gear flag: %s", tostring(unusableGear)))
 
     -- Equipment roll check end
 
@@ -115,14 +108,7 @@ local function ProcessLootItem(itemLink, rollID)
 
     -- Armor roll check start
 
-    print("starting armor type check")
-
-    print("getting subtype")
-
     itemSubType = tostring(itemSubType)
-
-    print("finished getting subtype: %s", itemSubType)
-
 
     local playerWhitelist = classArmorGreedlist[playerClass]
     local isGreedlisted = isItemInGreedlist(itemSubType, playerWhitelist)
@@ -131,8 +117,6 @@ local function ProcessLootItem(itemLink, rollID)
     local isNotBackSlot = (equipLocID ~= "INVTYPE_CLOAK")
 
     local unusableArmorType = (isGreedlisted and isNotBackSlot)
-
-    print("finishing armor type check")
 
     -- Armor roll check end
 
