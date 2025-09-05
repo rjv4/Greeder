@@ -56,6 +56,7 @@ SlashCmdList["Greeder"] = SlashCmdHandler
 -- ============================================================================
 local eventFrame = CreateFrame("Frame")
 local playerClass = select(2, UnitClass("player"))
+local GreederIsRollingOnID = nil
 
 local classArmorGreedlist = {
     -- Cloth
@@ -145,6 +146,7 @@ local function ProcessLootItem(itemLink, rollID)
 
     if shouldRoll then
         print("Greeder: Automatically rolling Greed on " .. itemLink)
+        GreederIsRollingOnID = rollID
         RollOnLoot(rollID, 2)
     end
 end
@@ -165,3 +167,21 @@ end
 
 eventFrame:RegisterEvent("START_LOOT_ROLL")
 eventFrame:SetScript("OnEvent", OnLootRoll)
+
+
+
+-- ============================================================================
+-- 4. BoP CONFIRMATION HANDLER
+-- ============================================================================
+local confirmFrame = CreateFrame("Frame")
+
+local function OnConfirmLootRoll(self, event, rollID)
+    if GreederDB.enabled and GreederIsRollingOnID and GreederIsRollingOnID == rollID then
+        ConfirmLootRoll(rollID, 2)
+
+        GreederIsRollingOnID = nil -- resetting flag to avoid messing with user's normal prompts
+    end
+end
+
+confirmFrame:RegisterEvent("CONFIRM_LOOT_ROLL")
+confirmFrame:SetScript("OnEvent", OnConfirmLootRoll)
