@@ -3,6 +3,6 @@
 ## Notes: Automatically rolls greed on equippable items that are not usable by the current character's class
 ## Author: Rick
 ## Version: 2.1.0
-## SavedVariables: GreederDB
+## SavedVariablesPerCharacter: GreederDB
 
 Greeder.lua
